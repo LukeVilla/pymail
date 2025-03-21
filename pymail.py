@@ -1,6 +1,10 @@
 
 import configparser, os
 from imap_tools import MailBox
+try:
+    from getpass_asterisk.getpass_asterisk import getpass_asterisk as getpass
+except:
+    from getpass import getpass
 
 def setup():
     addr = input("Enter email address: ")
@@ -12,7 +16,7 @@ def pause():
     print("Press Enter to exit.")
     _ = input("")
 conf = configparser.ConfigParser()
-password = input("Enter password: ")
+password = getpass("Enter password: ")
 if not os.path.exists("pymail.ini"):
     setup()
 # conffil = open("pymail.ini", "r")
