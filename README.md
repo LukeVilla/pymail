@@ -12,10 +12,10 @@ Enter server URL: mail.example.com
 This will save the configuration info in a file called pymail.ini in the directory you are in.
 
 # Login
-After that (and every time the program runs), it will ask you for your password. Enter it to log in.
+After that (and every time the program runs), it will ask you for your password. Enter it to log in. If you have the [getpass-asterisk](https://pypi.org/project/getpass-asterisk/) module installed, the password will be displayed with asterisks. If not, then the program will fall back to the default `getpass` module and no password will be displayed at all.
 Example:
 ```
-Enter password: myPa$$
+Enter password: ******
 ```
 # Inbox
 When you have logged in, you will see your inbox. It consists of a numbered list of emails. You can only see the subjects of the emails in that view, but you can view the body and sender by typing in the email's number.
