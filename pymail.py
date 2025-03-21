@@ -1,6 +1,6 @@
 
-from imap_tools import MailBox
 import configparser, os
+from imap_tools import MailBox
 
 def setup():
 	addr = input("Enter email address: ")
@@ -19,8 +19,6 @@ if not os.path.exists("pymail.ini"):
 conf.read("pymail.ini")
 addr = conf["account"]["addr"]
 serv = conf["account"]["serv"]
-# Get date, subject and body len of all emails from INBOX folder
-print("InByte v1.0")
 with MailBox(serv).login(addr, password) as mailbox:
 	mail = list(mailbox.fetch())
 	while True:
@@ -40,7 +38,7 @@ with MailBox(serv).login(addr, password) as mailbox:
 		if num == -1:
 			print("\nExiting...")
 			break
-		elif num == -2:
+		if num == -2:
 			setup()
 			continue
 		print(f"You have chosen message {str(num)}. Body text is:")
