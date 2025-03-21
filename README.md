@@ -21,19 +21,14 @@ Enter password: myPa$$
 When you have logged in, you will see your inbox. It consists of a numbered list of emails. You can only see the subjects of the emails in that view, but you can view the body by typing in the email's number.
 Example:
 ```
-InByte v1.0
 0: Link
-1: ~*~MAKE MONEY QUICK!!!!!~*~
-2: Daily Stock Info
-3: Email Configuration Settings
+1: Email Configuration Settings
 Enter message number (-1 to exit, -2 to setup): 0
 You have chosen message 0. Body text is:
 Here's the link you wanted. example.com
 Press Enter to exit...
 0: Link
-1: ~*~MAKE MONEY QUICK!!!!!~*~
-2: Daily Stock Info
-3: Email Configuration Settings
+1: Email Configuration Settings
 Enter message number (-1 to exit, -2 to setup):
 ```
 You can also type -1 to exit or -2 to setup. Example:
