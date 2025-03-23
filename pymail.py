@@ -52,14 +52,14 @@ with MailBox(serv).login(addr, password) as mailbox:
         currmail = mail[num]
         print(f"You have chosen message {str(num)} from {currmail.from_}.")
         print(f"Subject: {currmail.subject}")
-        if currmail.text:
-            print("Body text: ")
-            print(currmail.text)
-        elif currmail.html:
+        if currmail.html:
             print("HTML detected. Attempting to render.")
             try:
                 render(currmail.html)
             except Exception as e:
                 print(f"Error rendering HTML: {e}")
                 print(currmail.html)
+        elif currmail.text:
+            print("Body text: ")
+            print(currmail.text)
         pause()
