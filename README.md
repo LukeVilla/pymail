@@ -18,7 +18,7 @@ Example:
 Enter password: ******
 ```
 # Inbox
-When you have logged in, you will see your inbox. It consists of a numbered list of emails. You can only see the subjects of the emails in that view, but you can view the body and sender by typing in the email's number.
+When you have logged in, you will see your inbox. It consists of a numbered list of emails. You can only see the subjects of the emails in that view, but you can view the body and sender by typing in the email's number. If the message is in HTML format, it will be opened in your default web browser.
 Example:
 ```
 0: Link

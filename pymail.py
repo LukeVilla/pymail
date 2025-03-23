@@ -1,9 +1,10 @@
 
 import configparser, os
 from imap_tools import MailBox
+from render_html import render_in_browser as render
 try:
     from getpass_asterisk.getpass_asterisk import getpass_asterisk as getpass
-except:
+except ImportError:
     from getpass import getpass
 
 def setup():
@@ -48,11 +49,17 @@ with MailBox(serv).login(addr, password) as mailbox:
         if not num <= len(mail) - 1:
             print("Error: Please enter a listed email number.")
             pause()
-        print(f"You have chosen message {str(num)} from {mail[num].from_}.")
-        print(f"Subject: {mail[num].subject}")
-        print("Body text: ")
-        if mail[num].text:
-            print(mail[num].text)
-        elif mail[num].html:
-            print(mail[num].html)
+        currmail = mail[num]
+        print(f"You have chosen message {str(num)} from {currmail.from_}.")
+        print(f"Subject: {currmail.subject}")
+        if currmail.text:
+            print("Body text: ")
+            print(currmail.text)
+        elif currmail.html:
+            print("HTML detected. Attempting to render.")
+            try:
+                render(currmail.html)
+            except Exception as e:
+                print(f"Error rendering HTML: {e}")
+                print(currmail.html)
         pause()
