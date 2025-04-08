@@ -1,4 +1,5 @@
-
+from textual.app import App
+from textual.widgets import Welcome
 import configparser, os
 from imap_tools import MailBox
 from render_html import render_in_browser as render
@@ -24,8 +25,16 @@ if not os.path.exists("pymail.ini"):
 conf.read("pymail.ini")
 addr = conf["account"]["addr"]
 serv = conf["account"]["serv"]
-with MailBox(serv).login(addr, password) as mailbox:
-    mail = list(mailbox.fetch())
+class PyMail(App):
+    def on_mount(self):
+        with MailBox(serv).login(addr, password) as mailbox:
+            self.mail = list(mailbox.fetch())
+    def compose(self):
+        yield Welcome()
+    def on_button_pressed(self):
+        self.exit()
+app = PyMail()
+app.run()
     # while True:
     #     i = 0
     #     for msg in mail:
