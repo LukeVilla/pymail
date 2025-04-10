@@ -29,14 +29,17 @@ with MailBox(serv).login(addr, password) as mailbox:
     mail = list(mailbox.fetch())
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
+    def update_if_exists(self, widget, new_text, new_id = None):
+        if self.query(widget):
+            from_addr = self.query_one(widget)
+            from_addr.update(new_text)
+        else:
+            self.mount(Label(new_text, id=new_id))
     def handle_select(self,index):
         currmail = mail[index]
         self.log(currmail)
-        if self.query("Label#from"):
-            from_addr = self.query_one("Label#from")
-            from_addr.update(f"From: {currmail.from_}")
-        else:
-            self.mount(Label(f"From: {currmail.from_}", id="from"))
+        self.update_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
+        self.update_if_exists("Label#from", f"From: {currmail.from_}", "from")
     def on_mount(self):
         pass
     def compose(self):
@@ -46,7 +49,7 @@ class PyMail(App):
             subs.append(ListItem(Label(msg.subject)))
         print(subs)
         yield ListView(*subs, id="emails")
-        yield Label("Press Ctrl-Q to exit.")
+        yield Label("Press Ctrl-Q to exit.", id="exit")
         # yield Welcome()
     def on_button_pressed(self):
         self.exit()
