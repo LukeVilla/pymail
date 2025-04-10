@@ -1,6 +1,6 @@
 from textual.app import App
 from textual.widgets import Footer, Label, Welcome, ListItem, Button, ListView, Placeholder
-import configparser, os
+import configparser, os, sys
 from imap_tools import MailBox
 from render_html import render_in_browser as render
 try:
@@ -19,7 +19,10 @@ def pause():
     print("Press Enter to exit.")
     _ = input("")
 conf = configparser.ConfigParser()
-password = getpass("Enter password: ")
+if sys.argv[1] == "-p":
+    password = sys.argv[2]
+else:
+    password = getpass("Enter password: ")
 if not os.path.exists("pymail.ini"):
     setup()
 # conffil = open("pymail.ini", "r")
