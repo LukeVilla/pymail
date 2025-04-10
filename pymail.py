@@ -6,6 +6,7 @@ from render_html import render_in_browser as render
 try:
     from getpass_asterisk.getpass_asterisk import getpass_asterisk as getpass
 except ImportError:
+    print("Warning: getpass_asterisk not found. Defaulting to getpass.")
     from getpass import getpass
 
 def setup():
