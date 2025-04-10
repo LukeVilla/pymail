@@ -1,5 +1,5 @@
 from textual.app import App
-from textual.widgets import Footer, Label, Welcome, ListItem, ListView, Placeholder
+from textual.widgets import Footer, Label, Welcome, ListItem, Button, ListView, Placeholder
 import configparser, os
 from imap_tools import MailBox
 from render_html import render_in_browser as render
@@ -29,17 +29,24 @@ with MailBox(serv).login(addr, password) as mailbox:
     mail = list(mailbox.fetch())
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
-    def update_if_exists(self, widget, new_text, new_id = None):
+    def update_label_if_exists(self, widget, new_text, new_id = None):
         if self.query(widget):
-            from_addr = self.query_one(widget)
-            from_addr.update(new_text)
+            dispwidget = self.query_one(widget)
+            dispwidget.update(new_text)
         else:
             self.mount(Label(new_text, id=new_id))
     def handle_select(self,index):
         currmail = mail[index]
         self.log(currmail)
-        self.update_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
-        self.update_if_exists("Label#from", f"From: {currmail.from_}", "from")
+        self.update_label_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
+        self.update_label_if_exists("Label#from", f"From: {currmail.from_}", "from")
+        self.update_label_if_exists("Label#body", f"{currmail.text}", "body")
+        if self.query("Button#html"):
+            button = self.query_one("Button#html")
+            if not currmail.html:
+                button.mount(Button("View HTML email", id="html", disabled=True))
+        else:
+            self.mount(Button("View HTML email", id="html"))
     def on_mount(self):
         pass
     def compose(self):
