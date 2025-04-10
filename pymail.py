@@ -28,6 +28,15 @@ serv = conf["account"]["serv"]
 with MailBox(serv).login(addr, password) as mailbox:
     mail = list(mailbox.fetch())
 class PyMail(App):
+    CSS_PATH = "pymail.tcss"
+    def handle_select(self,index):
+        currmail = mail[index]
+        self.log(currmail)
+        if self.query("Label#from"):
+            from_addr = self.query_one("Label#from")
+            from_addr.update(f"From: {currmail.from_}")
+        else:
+            self.mount(Label(f"From: {currmail.from_}", id="from"))
     def on_mount(self):
         pass
     def compose(self):
@@ -36,10 +45,15 @@ class PyMail(App):
         for msg in mail:
             subs.append(ListItem(Label(msg.subject)))
         print(subs)
-        yield ListView(*subs)
+        yield ListView(*subs, id="emails")
+        yield Label("Press Ctrl-Q to exit.")
         # yield Welcome()
     def on_button_pressed(self):
         self.exit()
+    def on_list_view_selected(self, event):
+        view = self.query_one(ListView)
+        self.log(f"Email selected: {view.index}")
+        self.handle_select(view.index)
     # def on_mount(self):
     #     pass
 app = PyMail()
