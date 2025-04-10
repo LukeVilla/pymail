@@ -43,14 +43,14 @@ class PyMail(App):
         currmail = mail[index]
         self.log(currmail)
         self.update_label_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
-        self.update_label_if_exists("Label#from", f"From: {currmail.from_}", "from")
-        self.update_label_if_exists("Label#body", f"{currmail.text}", "body")
+        self.update_label_if_exists("Label#from", f"From: {currmail.from_}\n", "from")
         if self.query("Button#html"):
             button = self.query_one("Button#html")
             if not currmail.html:
-                button.mount(Button("View HTML email", id="html", disabled=True))
+                button.disabled = True
         else:
-            self.mount(Button("View HTML email", id="html"))
+            self.mount(Button("View HTML email", id="html", disabled=not currmail.html))
+        self.update_label_if_exists("Label#body", f"\n{currmail.text}", "body")
     def on_mount(self):
         pass
     def compose(self):
