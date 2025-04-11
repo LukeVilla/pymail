@@ -25,7 +25,6 @@ else:
     password = getpass("Enter password: ")
 if not os.path.exists("pymail.ini"):
     setup()
-# conffil = open("pymail.ini", "r")
 conf.read("pymail.ini")
 addr = conf["account"]["addr"]
 serv = conf["account"]["serv"]
@@ -69,57 +68,16 @@ class PyMail(App):
         pass
     def compose(self):
         subs = []
-        # subs = [ListItem(Label("1")),ListItem(Label("2")),ListItem(Label("3"))]
         for msg in mail:
             subs.append(ListItem(Label(msg.subject)))
         print(subs)
         yield ListView(*subs, id="emails")
         yield Label("Press Ctrl-Q to exit.", id="exit")
-        # yield Welcome()
     def on_button_pressed(self):
         self.exit()
     def on_list_view_selected(self, event):
         view = self.query_one(ListView)
         self.log(f"Email selected: {view.index}")
         self.handle_select(view.index)
-    # def on_mount(self):
-    #     pass
 app = PyMail()
 app.run()
-    # while True:
-    #     i = 0
-    #     for msg in mail:
-    #         print(f"{str(i)}: {msg.subject}")
-    #         i += 1
-    #     try:
-    #         num = int(input("Enter message number (-1 to exit, -2 to setup): "))
-    #     except ValueError:
-    #         print("Error: Please enter a number.")
-    #         pause()
-    #         continue
-    #     except KeyboardInterrupt:
-    #         print("\nExiting...")
-    #         break
-    #     if num == -1:
-    #         print("\nExiting...")
-    #         break
-    #     if num == -2:
-    #         setup()
-    #         continue
-    #     if not num <= len(mail) - 1:
-    #         print("Error: Please enter a listed email number.")
-    #         pause()
-    #     currmail = mail[num]
-    #     print(f"You have chosen message {str(num)} from {currmail.from_}.")
-    #     print(f"Subject: {currmail.subject}")
-    #     if currmail.html:
-    #         print("HTML detected. Attempting to render.")
-    #         try:
-    #             render(currmail.html)
-    #         except Exception as e:
-    #             print(f"Error rendering HTML: {e}")
-    #             print(currmail.html)
-    #     elif currmail.text:
-    #         print("Body text: ")
-    #         print(currmail.text)
-    #     pause()
