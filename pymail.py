@@ -1,5 +1,5 @@
 from textual.app import App
-from textual.widgets import Footer, Label, Welcome, ListItem, Button, ListView, Placeholder
+from textual.widgets import Footer, Label, TextArea, Welcome, ListItem, Button, ListView, Placeholder
 import configparser, os, sys
 from imap_tools import MailBox
 from render_html import render_in_browser as render
@@ -33,6 +33,9 @@ with MailBox(serv).login(addr, password) as mailbox:
     mail = list(mailbox.fetch())
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
+    def action_html(self):
+        self.log(self.current_html)
+        render(self.current_html)
     def update_label_if_exists(self, widget, new_text, new_id = None):
         if self.query(widget):
             dispwidget = self.query_one(widget)
@@ -41,16 +44,27 @@ class PyMail(App):
             self.mount(Label(new_text, id=new_id))
     def handle_select(self,index):
         currmail = mail[index]
-        self.log(currmail)
+        self.log(currmail.text)
+        self.log(currmail.html)
         self.update_label_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
         self.update_label_if_exists("Label#from", f"From: {currmail.from_}\n", "from")
+        self.current_html = currmail.html
         if self.query("Button#html"):
             button = self.query_one("Button#html")
-            if not currmail.html:
-                button.disabled = True
+            button.disabled = not currmail.html
         else:
-            self.mount(Button("View HTML email", id="html", disabled=not currmail.html))
-        self.update_label_if_exists("Label#body", f"\n{currmail.text}", "body")
+            self.mount(Button("View HTML email", id="html", action=f"app.html", disabled=not currmail.html))
+        if self.query("TextArea#body"):
+            body = self.query_one("TextArea#body")
+            if currmail.text:
+                body.text = currmail.text
+            else:
+                body.text = "Only HTML content was found in this email."
+        else:
+            if currmail.text:
+                self.mount(TextArea(text=f"\n{currmail.text}", read_only=True, id="body"))
+            else:
+                self.mount(TextArea(text=f"\nOnly HTML content was found in this email.", read_only=True, id="body"))
     def on_mount(self):
         pass
     def compose(self):
