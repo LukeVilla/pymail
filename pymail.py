@@ -1,7 +1,7 @@
 from textual.app import App
 from textual import log
 from textual.widgets import Footer, Label, TextArea, Welcome, ListItem, Button, ListView, Placeholder
-import configparser, os, sys, string
+import configparser, os, sys, string, argparse
 from imap_tools import MailBox
 from render_html import render_in_browser as render
 try:
@@ -27,16 +27,46 @@ def sanitize(localstring):
         else:
             log(f"Warning: Character {char} invalid.")
     return "".join(out)
-conf = configparser.ConfigParser()
-if sys.argv[1] == "-p":
-    password = sys.argv[2]
+
+def do_args():
+    opts = {}
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-p", "--password", action="store", help="Your email password")
+    parser.add_argument("-s", "--server", action="store", help="Your email server")
+    parser.add_argument("-a", "--address", action="store", help="Your email address")
+    args = parser.parse_args()
+
+    opts["password"] = args.password
+    opts["server"] = args.server
+    opts["address"] = args.address
+
+    return opts
+
+def read_conf(field):
+    conf = configparser.ConfigParser()
+    opts = {}
+    if not os.path.exists("pymail.ini"):
+        setup()
+    conf.read("pymail.ini")
+    opts["address"] = conf["account"]["addr"]
+    opts["server"] = conf["account"]["serv"]
+    return opts[field]
+
+options = do_args()
+if options["password"]:
+    password = options["password"]
 else:
     password = getpass("Enter password: ")
-if not os.path.exists("pymail.ini"):
-    setup()
-conf.read("pymail.ini")
-addr = conf["account"]["addr"]
-serv = conf["account"]["serv"]
+if options["server"]:
+    serv = options["server"]
+else:
+    serv = read_conf("server")
+if options["address"]:
+    addr = options["address"]
+else:
+    addr = read_conf("address")
+
 with MailBox(serv).login(addr, password) as mailbox:
     mail = list(mailbox.fetch())
 class PyMail(App):
