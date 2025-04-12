@@ -1,6 +1,7 @@
 from textual.app import App
+from textual import log
 from textual.widgets import Footer, Label, TextArea, Welcome, ListItem, Button, ListView, Placeholder
-import configparser, os, sys
+import configparser, os, sys, string
 from imap_tools import MailBox
 from render_html import render_in_browser as render
 try:
@@ -18,6 +19,14 @@ def setup():
 def pause():
     print("Press Enter to exit.")
     _ = input("")
+def sanitize(localstring):
+    out = []
+    for char in localstring:
+        if char in string.printable:
+            out.append(char)
+        else:
+            log(f"Warning: Character {char} invalid.")
+    return "".join(out)
 conf = configparser.ConfigParser()
 if sys.argv[1] == "-p":
     password = sys.argv[2]
@@ -33,8 +42,9 @@ with MailBox(serv).login(addr, password) as mailbox:
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
     def action_html(self):
-        self.log(self.current_html)
-        render(self.current_html)
+        self.sanitized_html = sanitize(self.current_html)
+        # self.log(self.current_html)
+        render(self.sanitized_html)
     def update_label_if_exists(self, widget, new_text, new_id = None):
         if self.query(widget):
             dispwidget = self.query_one(widget)
@@ -43,8 +53,8 @@ class PyMail(App):
             self.mount(Label(new_text, id=new_id))
     def handle_select(self,index):
         currmail = mail[index]
-        self.log(currmail.text)
-        self.log(currmail.html)
+        # self.log(currmail.text)
+        # self.log(currmail.html)
         self.update_label_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
         self.update_label_if_exists("Label#from", f"From: {currmail.from_}\n", "from")
         self.current_html = currmail.html
