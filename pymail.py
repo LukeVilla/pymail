@@ -110,7 +110,8 @@ class PyMail(App):
         subs = []
         for msg in mail:
             subs.append(ListItem(Label(msg.subject)))
-        print(subs)
+        # print(subs)
+        subs = list(reversed(subs))
         yield ListView(*subs, id="emails")
         yield Label("Press Ctrl-Q to exit.", id="exit")
     def on_button_pressed(self):
