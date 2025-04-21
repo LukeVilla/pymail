@@ -72,9 +72,9 @@ with MailBox(serv).login(addr, password) as mailbox:
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
     def action_html(self):
-        self.sanitized_html = sanitize(self.current_html)
+        # self.sanitized_html = sanitize(self.current_html)
         # self.log(self.current_html)
-        render(self.sanitized_html)
+        render(self.current_html, encoding="utf8")
     def update_label_if_exists(self, widget, new_text, new_id = None):
         if self.query(widget):
             dispwidget = self.query_one(widget)
