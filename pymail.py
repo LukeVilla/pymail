@@ -112,6 +112,7 @@ class PyMail(App):
             subs.append(ListItem(Label(msg.subject)))
         # print(subs)
         subs = list(reversed(subs))
+        self.emailsnum = len(subs)
         yield ListView(*subs, id="emails")
         yield Label("Press Ctrl-Q to exit.", id="exit")
     def on_button_pressed(self):
@@ -119,6 +120,6 @@ class PyMail(App):
     def on_list_view_selected(self, event):
         view = self.query_one(ListView)
         self.log(f"Email selected: {view.index}")
-        self.handle_select(view.index)
+        self.handle_select((self.emailsnum - view.index) - 1)
 app = PyMail()
 app.run()
