@@ -10,7 +10,7 @@ except ImportError:
     print("Warning: getpass_asterisk not found. Defaulting to getpass.")
     from getpass import getpass
 
-def setup():
+def setup(conf):
     addr = input("Enter email address: ")
     serv = input("Enter server URL: ")
     conf["account"] = {"addr":addr, "serv":serv}
@@ -47,7 +47,7 @@ def read_conf(field):
     conf = configparser.ConfigParser()
     opts = {}
     if not os.path.exists("pymail.ini"):
-        setup()
+        setup(conf)
     conf.read("pymail.ini")
     opts["address"] = conf["account"]["addr"]
     opts["server"] = conf["account"]["serv"]
