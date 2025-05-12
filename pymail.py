@@ -54,10 +54,6 @@ def read_conf(field):
     return opts[field]
 
 options = do_args()
-if options["password"]:
-    password = options["password"]
-else:
-    password = getpass("Enter password: ")
 if options["server"]:
     serv = options["server"]
 else:
@@ -66,6 +62,10 @@ if options["address"]:
     addr = options["address"]
 else:
     addr = read_conf("address")
+if options["password"]:
+    password = options["password"]
+else:
+    password = getpass("Enter password: ")
 
 with MailBox(serv).login(addr, password) as mailbox:
     mail = list(mailbox.fetch())
