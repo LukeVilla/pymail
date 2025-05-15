@@ -1,5 +1,6 @@
 from textual.app import App
 from textual import log
+from textual.screen import Screen
 from textual.widgets import Footer, Label, TextArea, Welcome, ListItem, Button, ListView, Placeholder
 import configparser, os, sys, string, argparse
 from imap_tools import MailBox
@@ -121,5 +122,7 @@ class PyMail(App):
         view = self.query_one(ListView)
         self.log(f"Email selected: {view.index}")
         self.handle_select((self.emailsnum - view.index) - 1)
+class Setup(Screen):
+    pass
 app = PyMail()
 app.run()
