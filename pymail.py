@@ -78,12 +78,13 @@ def read_conf(field):
 
 def write_conf(field, new, category="account"):
     conf = configparser.ConfigParser()
-    opts = {}
     if not os.path.exists("pymail.ini"):
         setup(conf)
     conf.read("pymail.ini")
     conf[category][field] = new
-    conf.write(conf)
+    log(conf)
+    with open("pymail.ini", "w+") as config:
+        conf.write(config)
 
 options = do_args()
 if options["server"]:
@@ -99,8 +100,18 @@ if options["password"]:
 else:
     password = getpass("Enter password: ")
 
-with MailBox(serv).login(addr, password) as mailbox:
-    mail = list(mailbox.fetch())
+try:
+    with MailBox(serv).login(addr, password) as mailbox:
+        mail = list(mailbox.fetch())
+except Exception as e:
+    print("Error: Login failed. Error message:")
+    print(e)
+    option = input("Do you want to reconfigure your email settings? (Y/N) ")
+    if option.lower() == "y":
+        setup(configparser.ConfigParser())
+        print("Setup complete. Please reopen the program.")
+    sys.exit(1)
+
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
     SCREENS = {"setup": Setup}
