@@ -39,17 +39,6 @@ def setup(conf):
     conf["account"] = {"addr":addr, "serv":serv}
     with open("pymail.ini", "w") as mconf:
         conf.write(mconf)
-def pause():
-    print("Press Enter to exit.")
-    _ = input("")
-def sanitize(localstring):
-    out = []
-    for char in localstring:
-        if char in string.printable:
-            out.append(char)
-        else:
-            log(f"Warning: Character {char} invalid.")
-    return "".join(out)
 
 def do_args():
     opts = {}
@@ -115,7 +104,8 @@ except Exception as e:
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
     SCREENS = {"setup": Setup}
-    BINDINGS = [("ctrl+s", "open_settings", "Settings"),
+    BINDINGS = [("ctrl+d", "delete", "Delete"),
+                ("ctrl+s", "open_settings", "Settings"),
                 ("ctrl+q", "exit", "Exit")]
     
     def write_settings(self, settings):
@@ -123,16 +113,18 @@ class PyMail(App):
         for key, val in settings.items():
             write_conf(key, val)
         log(settings)
+
+    # Actions
     def action_open_settings(self):
         self.refresh_bindings()
         self.push_screen(Setup(), self.write_settings)
         self.refresh_bindings()
     def action_html(self):
-        # self.sanitized_html = sanitize(self.current_html)
-        # self.log(self.current_html)
         render(self.current_html, encoding="utf8")
     def action_exit(self):
         self.exit()
+
+
     def update_label_if_exists(self, widget, new_text, new_id = None):
         if self.query(widget):
             dispwidget = self.query_one(widget)
