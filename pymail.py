@@ -1,5 +1,5 @@
 from textual.app import App
-from textual import log, events, on, work
+from textual import log, events, on, work, markup
 from textual.screen import Screen
 from textual.containers import Vertical
 from textual.widgets import Footer, Label, Input, TextArea, Welcome, ListItem, Button, ListView, Placeholder
@@ -89,23 +89,26 @@ if options["password"]:
 else:
     password = getpass("Enter password: ")
 
-try:
-    with MailBox(serv).login(addr, password) as mailbox:
-        mail = list(mailbox.fetch())
-except Exception as e:
-    print("Error: Login failed. Error message:")
-    print(e)
-    option = input("Do you want to reconfigure your email settings? (Y/N) ")
-    if option.lower() == "y":
-        setup(configparser.ConfigParser())
-        print("Setup complete. Please reopen the program.")
-    sys.exit(1)
+def get_mail():
+    try:
+        with MailBox(serv).login(addr, password) as mailbox:
+            mail = list(mailbox.fetch())
+    except Exception as e:
+        print("Error: Login failed. Error message:")
+        print(e)
+        option = input("Do you want to reconfigure your email settings? (Y/N) ")
+        if option.lower() == "y":
+            setup(configparser.ConfigParser())
+            print("Setup complete. Please reopen the program.")
+        sys.exit(1)
+    return mail
 
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
     SCREENS = {"setup": Setup}
     BINDINGS = [("ctrl+d", "delete", "Delete"),
                 ("ctrl+s", "open_settings", "Settings"),
+                ("ctrl+r", "refresh", "Refresh"),
                 ("ctrl+q", "exit", "Exit")]
     
     def write_settings(self, settings):
@@ -123,7 +126,16 @@ class PyMail(App):
         render(self.current_html, encoding="utf8")
     def action_exit(self):
         self.exit()
-
+    def action_refresh(self):
+        subs = []
+        emails = self.query_one("#emails",ListView)
+        emails.clear()
+        self.mail = get_mail()
+        for msg in self.mail:
+            subs.append(ListItem(Label(markup.escape(msg.subject))))
+        subs = list(reversed(subs))
+        self.emailsnum = len(subs)
+        emails.extend(subs)
 
     def update_label_if_exists(self, widget, new_text, new_id = None):
         if self.query(widget):
@@ -132,7 +144,7 @@ class PyMail(App):
         else:
             self.mount(Label(new_text, id=new_id))
     def handle_select(self,index):
-        currmail = mail[index]
+        currmail = self.mail[index]
         # self.log(currmail.text)
         # self.log(currmail.html)
         self.update_label_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
@@ -157,10 +169,12 @@ class PyMail(App):
     def on_mount(self):
         pass
     def compose(self):
+        # yield Label("Loading...\nThis may take a while if you have a lot of emails.")
         subs = []
         # bottom = [Label("Press Ctrl-Q to exit.", id="exit"), Footer()]
-        for msg in mail:
-            subs.append(ListItem(Label(msg.subject)))
+        self.mail = get_mail()
+        for msg in self.mail:
+            subs.append(ListItem(Label(markup.escape(msg.subject))))
         # print(subs)
         subs = list(reversed(subs))
         self.emailsnum = len(subs)
