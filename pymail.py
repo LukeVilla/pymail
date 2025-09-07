@@ -4,7 +4,7 @@ from textual.screen import Screen
 from textual.containers import Vertical
 from textual.widgets import Footer, Label, Input, TextArea, Welcome, ListItem, Button, ListView, Placeholder
 import configparser, os, sys, string, argparse
-from imap_tools import MailBox
+from imap_tools import MailBox, A
 from render_html import render_in_browser as render
 try:
     from getpass_asterisk.getpass_asterisk import getpass_asterisk as getpass
@@ -33,7 +33,7 @@ class Setup(Screen):
             return None
         return True
 
-def setup(conf):
+def setup(conf: configparser.ConfigParser):
     addr = input("Enter email address: ")
     serv = input("Enter server URL: ")
     conf["account"] = {"addr":addr, "serv":serv}
@@ -47,15 +47,17 @@ def do_args():
     parser.add_argument("-p", "--password", action="store", help="Your email password")
     parser.add_argument("-s", "--server", action="store", help="Your email server")
     parser.add_argument("-a", "--address", action="store", help="Your email address")
+    parser.add_argument("--setup", action="store_true", help="Launch the setup process")
     args = parser.parse_args()
 
     opts["password"] = args.password
     opts["server"] = args.server
     opts["address"] = args.address
+    opts["setup"] = args.setup
 
     return opts
 
-def read_conf(field):
+def read_conf(field: str):
     conf = configparser.ConfigParser()
     opts = {}
     if not os.path.exists("pymail.ini"):
@@ -65,7 +67,7 @@ def read_conf(field):
     opts["server"] = conf["account"]["serv"]
     return opts[field]
 
-def write_conf(field, new, category="account"):
+def write_conf(field: str, new: str, category="account"):
     conf = configparser.ConfigParser()
     if not os.path.exists("pymail.ini"):
         setup(conf)
@@ -76,6 +78,8 @@ def write_conf(field, new, category="account"):
         conf.write(config)
 
 options = do_args()
+if options["setup"]:
+    setup(configparser.ConfigParser())
 if options["server"]:
     serv = options["server"]
 else:
@@ -102,6 +106,9 @@ def get_mail():
             setup(configparser.ConfigParser())
             print("Setup complete. Please reopen the program.")
         sys.exit(1)
+def search_uids(query):
+    with MailBox(serv).login(addr, password) as mailbox:
+        return mailbox.uids(query)
 
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
@@ -142,13 +149,13 @@ class PyMail(App):
         self.mailbox.delete(currmail.uid) # type: ignore
         self.action_refresh()
 
-    def update_label_if_exists(self, widget, new_text, new_id = None):
+    def update_label_if_exists(self, widget: str, new_text: str, new_id = None):
         if self.query(widget):
             dispwidget = self.query_one(widget)
             dispwidget.update(new_text)
         else:
             self.mount(Label(new_text, id=new_id))
-    def handle_select(self,index):
+    def handle_select(self,index: int):
         currmail = self.mail[index]
         self.update_label_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
         self.update_label_if_exists("Label#from", f"From: {currmail.from_}\n", "from")
