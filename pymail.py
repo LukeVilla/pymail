@@ -150,8 +150,6 @@ class PyMail(App):
             self.mount(Label(new_text, id=new_id))
     def handle_select(self,index):
         currmail = self.mail[index]
-        # self.log(currmail.text)
-        # self.log(currmail.html)
         self.update_label_if_exists("Label#subject", f"Subject: {currmail.subject}", "subject")
         self.update_label_if_exists("Label#from", f"From: {currmail.from_}\n", "from")
         self.current_html = currmail.html
@@ -174,18 +172,13 @@ class PyMail(App):
     def on_mount(self):
         pass
     def compose(self):
-        # yield Label("Loading...\nThis may take a while if you have a lot of emails.")
         subs = []
-        # bottom = [Label("Press Ctrl-Q to exit.", id="exit"), Footer()]
         self.mail,self.mailbox = get_mail()
         for msg in self.mail:
             subs.append(ListItem(Label(markup.escape(msg.subject))))
-        # print(subs)
         subs = list(reversed(subs))
         self.emailsnum = len(subs)
         yield ListView(*subs, id="emails")
-        # yield Vertical(*bottom, id="bottom")
-        # yield Label("Press Ctrl-Q to exit.", id="exit")
         yield Footer()
     def on_list_view_selected(self, event):
         view = self.query_one(ListView)
