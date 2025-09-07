@@ -26,7 +26,7 @@ class Setup(Screen):
         self.refresh_bindings()
         addr = self.query_one("#address")
         serv = self.query_one("#server")
-        self.dismiss({"addr": addr.value, "serv": serv.value})
+        self.dismiss({"addr": addr.value, "serv": serv.value}) # type: ignore
     def check_action(self, action, parameters):
         self.refresh_bindings()
         if action == "open_settings":
@@ -93,6 +93,7 @@ def get_mail():
     try:
         with MailBox(serv).login(addr, password) as mailbox:
             mail = list(mailbox.fetch())
+            return mail,mailbox
     except Exception as e:
         print("Error: Login failed. Error message:")
         print(e)
@@ -101,7 +102,6 @@ def get_mail():
             setup(configparser.ConfigParser())
             print("Setup complete. Please reopen the program.")
         sys.exit(1)
-    return mail
 
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
@@ -130,12 +130,17 @@ class PyMail(App):
         subs = []
         emails = self.query_one("#emails",ListView)
         emails.clear()
-        self.mail = get_mail()
+        self.mail,self.mailbox = get_mail()
         for msg in self.mail:
             subs.append(ListItem(Label(markup.escape(msg.subject))))
         subs = list(reversed(subs))
         self.emailsnum = len(subs)
         emails.extend(subs)
+    def action_delete(self):
+        emails = self.query_one("#emails",ListView)
+        currmail = self.mail[self.emailsnum - emails.index - 1] # type: ignore
+        self.mailbox.delete(currmail.uid) # type: ignore
+        self.action_refresh()
 
     def update_label_if_exists(self, widget, new_text, new_id = None):
         if self.query(widget):
@@ -172,7 +177,7 @@ class PyMail(App):
         # yield Label("Loading...\nThis may take a while if you have a lot of emails.")
         subs = []
         # bottom = [Label("Press Ctrl-Q to exit.", id="exit"), Footer()]
-        self.mail = get_mail()
+        self.mail,self.mailbox = get_mail()
         for msg in self.mail:
             subs.append(ListItem(Label(markup.escape(msg.subject))))
         # print(subs)
@@ -185,6 +190,6 @@ class PyMail(App):
     def on_list_view_selected(self, event):
         view = self.query_one(ListView)
         self.log(f"Email selected: {view.index}")
-        self.handle_select((self.emailsnum - view.index) - 1)
+        self.handle_select((self.emailsnum - view.index) - 1) # type: ignore
 app = PyMail()
 app.run()
