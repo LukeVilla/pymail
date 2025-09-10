@@ -109,6 +109,9 @@ def get_mail():
 def search_uids(query):
     with MailBox(serv).login(addr, password) as mailbox:
         return mailbox.uids(query)
+def delete_uid(uid: int):
+    with MailBox(serv).login(addr, password) as mailbox:
+        mailbox.delete(str(uid))
 
 class PyMail(App):
     CSS_PATH = "pymail.tcss"
@@ -146,7 +149,7 @@ class PyMail(App):
     def action_delete(self):
         emails = self.query_one("#emails",ListView)
         currmail = self.mail[self.emailsnum - emails.index - 1] # type: ignore
-        self.mailbox.delete(currmail.uid) # type: ignore
+        delete_uid(currmail.uid) # type: ignore
         self.action_refresh()
 
     def update_label_if_exists(self, widget: str, new_text: str, new_id = None):
